@@ -1,0 +1,4 @@
+<%= form_for @user do |f| %>
+  <%= f.collection_check_boxes :car_ids, Car.all, :to_param, :name %>
+  <%= f.submit %>
+<% end %>

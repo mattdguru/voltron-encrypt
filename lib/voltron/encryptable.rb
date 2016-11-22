@@ -1,6 +1,10 @@
 module Voltron
   module Encryptable
 
+    def has_encrypted_id?
+      false
+    end
+
     def encrypted_id
       extend ClassMethods
       include InstanceMethods
@@ -13,6 +17,10 @@ module Voltron
     end
 
     module ClassMethods
+      def has_encrypted_id?
+        true
+      end
+
       def find(*args)
         scope = args.slice!(0)
         options = args.slice!(0) || {}
@@ -20,7 +28,7 @@ module Voltron
         if !options[:bypass] && ![:first, :last, :all].include?(scope.try(:to_sym))
           scope = decoded_ids(scope)
         end
-        
+
         super(scope)
       end
 

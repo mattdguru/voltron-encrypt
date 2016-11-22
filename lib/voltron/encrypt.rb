@@ -2,6 +2,7 @@ require "voltron"
 require "voltron/encrypt/version"
 require "voltron/config/encrypt"
 require "voltron/encryptable"
+require "voltron/encrypt/active_record/collection_association"
 
 module Voltron
   class Encrypt
@@ -49,15 +50,15 @@ module Voltron
       !blacklist(encoded.length).match(regex).nil?
     end
 
-    private
-
-      def blacklist(len = 6)
-        if File.exist?(Voltron.config.encrypt.blacklist.to_s)
-          File.readlines(Voltron.config.encrypt.blacklist).map(&:strip).reject { |line| line.length > len }.join(" ")
-        else
-          ""
-        end
+    def blacklist(len = 6)
+      if File.exist?(Voltron.config.encrypt.blacklist.to_s)
+        File.readlines(Voltron.config.encrypt.blacklist).map(&:strip).reject { |line| line.length > len }.join(" ")
+      else
+        ""
       end
+    end
+
+    private
 
       def translations
         {
