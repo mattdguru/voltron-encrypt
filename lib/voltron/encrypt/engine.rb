@@ -6,7 +6,6 @@ module Voltron
 
       initializer "voltron.encrypt.initialize" do
         ::ActiveRecord::Base.send :extend, ::Voltron::Encryptable
-        ::ActiveRecord::Base.send :include, ::Voltron::Preprocessor
         ::ActiveRecord::Associations::CollectionAssociation.send :prepend, ::Voltron::Encrypt::ActiveRecord::CollectionAssociation
 
         # Corrects sidekiq resource lookup by forcing it to find_by_id rather than find with the model id
