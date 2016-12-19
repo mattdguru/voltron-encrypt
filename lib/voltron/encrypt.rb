@@ -39,7 +39,7 @@ module Voltron
       encoded = encode(input)
 
       pattern = ["\\b([_\\-])*"]
-      encoded.split("").each do |c|
+      encoded.chars.each do |c|
         subs = translations[c.downcase] || []
         c = "\\#{c}" if c == "-"
         pattern << "[#{c}#{subs.join}]([_\\-])*"
@@ -76,7 +76,7 @@ module Voltron
 
       def digits
         rnd = Random.new(Voltron.config.encrypt.seed.to_s.to_i(24))
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".split("").shuffle(random: rnd)
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".chars.shuffle(random: rnd)
       end
   end
 end
