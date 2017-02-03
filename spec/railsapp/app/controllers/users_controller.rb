@@ -14,10 +14,20 @@ class UsersController < ApplicationController
     end
   end
 
+  def update
+    @user = User.find(params[:id])
+
+    if @user.update(user_params)
+      redirect_to edit_user_path(@user), notice: "User updated successfully."
+    else
+      redirect_to edit_user_path(@user), alert: @user.errors.full_messages
+    end
+  end
+
   private
 
     def user_params
-      params.require(:user).permit(:email, :phone, car_ids: [])
+      params.require(:user).permit(:email, :phone, :car_id, car_ids: [])
     end
 
 end

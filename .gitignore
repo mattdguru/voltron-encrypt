@@ -11,3 +11,4 @@ log/
 voltron-*.gem
 *.bak
 *.sqlite3
+.byebug_history

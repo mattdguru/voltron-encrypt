@@ -14,6 +14,26 @@ module Voltron
       before_create do
         self.build_encryptable id: find_id
       end
+
+      after_initialize do
+        self.class.reflect_on_all_associations(:belongs_to).each do |belongs|
+
+          # Override the attribute setter method, intercept any value and try and find it by
+          # it's encrypted id. We're assuming the ids passed in the params are encrypted since
+          # our model is using an encrypted id
+          self.class.send(:define_method, "#{belongs.name}_id=") do |val|
+            begin
+              klass = (belongs.options[:class_name] || belongs.name).to_s.classify.constantize
+              return super(val) unless klass.has_encrypted_id?
+              record = klass.find(val)
+              super(record.id)
+            rescue NameError, ActiveRecord::RecordNotFound
+              super(val)
+            end
+          end
+        end
+      end
+
     end
 
     module ClassMethods
@@ -38,7 +58,7 @@ module Voltron
           super(decoded_ids(conditions))
         else
           # Otherwise do what exists? normally does
-          super(conditions)
+          super
         end
       end
 

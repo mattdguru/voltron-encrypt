@@ -10,4 +10,6 @@ class User < ActiveRecord::Base
 
   has_many :animals, through: :user_animals
 
+  belongs_to :car, class_name: "Car"
+
 end
