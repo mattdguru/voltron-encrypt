@@ -15,6 +15,8 @@ module Voltron
         self.build_encryptable id: find_id
       end
 
+      default_scope { joins(:encryptable).includes(:encryptable) }
+
       after_initialize do
         self.class.reflect_on_all_associations(:belongs_to).each do |belongs|
 
