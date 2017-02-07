@@ -17,25 +17,6 @@ module Voltron
 
       default_scope { joins(:encryptable).includes(:encryptable) }
 
-      after_initialize do
-        self.class.reflect_on_all_associations(:belongs_to).each do |belongs|
-
-          # Override the attribute setter method, intercept any value and try and find it by
-          # it's encrypted id. We're assuming the ids passed in the params are encrypted since
-          # our model is using an encrypted id
-          self.class.send(:define_method, "#{belongs.name}_id=") do |val|
-            begin
-              klass = (belongs.options[:class_name] || belongs.name).to_s.classify.constantize
-              return super(val) unless klass.has_encrypted_id?
-              record = klass.find(val)
-              super(record.id)
-            rescue NameError, ActiveRecord::RecordNotFound
-              super(val)
-            end
-          end
-        end
-      end
-
     end
 
     module ClassMethods
@@ -87,6 +68,23 @@ module Voltron
     end
 
     module InstanceMethods
+      def assign_attributes(new_attributes)
+        belongs = self.class.reflect_on_all_associations(:belongs_to).map { |b| { column: "#{b.name}_id", class_name: (b.options[:class_name] || b.name).to_s.classify } }
+
+        belongs.each do |belong|
+          begin
+            klass = belong[:class_name].safe_constantize
+            value = new_attributes[belong[:column]]
+            next if !klass.has_encrypted_id? || value.blank?
+            record = klass.find(value)
+            new_attributes[belong[:column]] = record.id
+          rescue NameError, ActiveRecord::RecordNotFound
+          end
+        end
+
+        super(new_attributes)
+      end
+
       def to_param
         return super if encryptable.nil?
 
