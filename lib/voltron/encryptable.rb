@@ -85,6 +85,24 @@ module Voltron
         super(new_attributes)
       end
 
+      def update_attributes(attributes)
+        attributes.symbolize_keys!
+        belongs = self.class.reflect_on_all_associations(:belongs_to).map { |b| { column: "#{b.name}_id", class_name: (b.options[:class_name] || b.name).to_s.classify } }
+
+        belongs.each do |belong|
+          begin
+            klass = belong[:class_name].safe_constantize
+            value = attributes[belong[:column]]
+            next if !klass.has_encrypted_id? || value.blank?
+            record = klass.find(value)
+            attributes[belong[:column]] = record.id
+          rescue NameError, ActiveRecord::RecordNotFound
+          end
+        end
+
+        super(attributes)
+      end
+
       def to_param
         return super if encryptable.nil?
 
